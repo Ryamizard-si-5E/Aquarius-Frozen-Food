@@ -1,0 +1,30 @@
+{
+  "name": "wa-broadcast",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "puppeteer": "^24.22.2",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "tar-fs": "^3.1.1",
+    "whatsapp-web.js": "^1.34.1",
+    "ws": "^8.18.3"
+  },
+  "overrides": {
+    "whatsapp-web.js": {
+      "puppeteer": "24.22.2",
+      "ws": "8.18.3",
+      "tar-fs": "3.1.1"
+    }
+  }
+}
