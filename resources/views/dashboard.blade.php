@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <style>
+    .card:hover { cursor: pointer; transform: scale(1.02); }
+  </style>
+</head>
+@include('Components.header2')
+
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show text-center mt-3" role="alert">
+        <strong>✅ Berhasil!</strong> {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show text-center mt-3" role="alert">
+        <strong>⚠️ Gagal!</strong> {{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+<body>
+<div class="container py-5">
+  <h2 class="text-center mb-5 fw-bold">📦 Semua Produk Kami</h2>
+  <div class="row g-4">
+    @foreach($barangs as $barang)
+    <div class="col-md-4">
+      <!-- Card Produk -->
+      <div class="card h-100 shadow-sm product-card border-0" role="button" data-bs-toggle="modal" data-bs-target="#popup-{{ $barang->id_barang }}">
+        <div class="position-relative">
+          <img src="{{ asset('images/'.$barang->gambar) }}" class="card-img-top product-img rounded-top" alt="{{ $barang->nama_barang }}">
+
+          @if($barang->stok == 0)
+            <!-- Badge stok habis -->
+            <span class="badge bg-danger position-absolute top-0 start-0 m-2 px-3 py-2 rounded-pill">Stok Habis</span>
+          @else
+            <!-- Badge stok tersedia -->
+            <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-2">Stok: {{ $barang->stok }}</span>
+          @endif
+        </div>
+        <div class="card-body text-center">
+          <h5 class="card-title fw-bold">{{ $barang->nama_barang }}</h5>
+          <p class="card-text text-success fw-semibold">Rp {{ number_format($barang->harga) }}/{{ $barang->satuan }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Detail Produk -->
+<div class="modal fade" id="popup-{{ $barang->id_barang }}" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow-lg">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold">{{ $barang->nama_barang }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row align-items-center">
+          <!-- Gambar Produk -->
+          <div class="col-md-6 text-center">
+            <img src="{{ asset('images/'.$barang->gambar) }}" 
+                 class="img-fluid rounded shadow-sm mb-3">
+          </div>
+
+          <!-- Detail Produk -->
+          <div class="col-md-6">
+            <p><strong>Harga:</strong> <span class="text-success">Rp {{ number_format($barang->harga) }}/{{ $barang->satuan }}</span></p>
+            <p><strong>Stok:</strong> {{ $barang->stok }}</p>
+
+            @if($barang->stok > 0)
+              <!-- Jika stok masih ada -->
+              <form method="POST" action="{{ route('keranjang.tambah', $barang->id_barang) }}">
+                @csrf
+                <div class="mb-3">
+                  <label for="jumlah-{{ $barang->id_barang }}" class="form-label">Jumlah</label>
+                  <input type="number" name="jumlah" id="jumlah-{{ $barang->id_barang }}" 
+                         class="form-control" min="1" max="{{ $barang->stok }}" value="1">
+                </div>
+
+                @auth
+                  <button type="submit" class="btn btn-success w-100 rounded-pill">🛒 Masukkan ke Keranjang</button>
+                @else
+                  <a href="{{ route('login') }}" class="btn btn-primary w-100 rounded-pill"
+                     onclick="alert('Silakan login terlebih dahulu untuk menambahkan ke keranjang');">
+                    🛒 Masukkan ke Keranjang
+                  </a>
+                @endauth
+              </form>
+            @else
+              <!-- Jika stok habis -->
+              <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <span class="me-2">❌</span>
+                <div>Maaf, stok produk ini sudah habis.</div>
+              </div>
+              <button class="btn btn-secondary w-100 rounded-pill" disabled>
+                🛒 Masukkan ke Keranjang
+              </button>
+            @endif
+
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer bg-light">
+        <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Tutup</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+    @endforeach
+  </div>
+</div>
+
+<!-- CSS tambahan biar gambar seragam + efek hover -->
+<style>
+    /* Judul Section */
+    .section-title {
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 50px;
+      position: relative;
+      font-size: 2rem;
+    }
+    .section-title::after {
+      content: "";
+      display: block;
+      width: 80px;
+      height: 4px;
+      background: #1abc9c;
+      margin: 10px auto 0;
+      border-radius: 10px;
+      animation: expand 2s infinite alternate;
+    }
+    @keyframes expand {
+      from { width: 40px; }
+      to { width: 120px; }
+    }
+
+    /* Card Produk */
+    .product-card {
+      border-radius: 20px;
+      overflow: hidden;
+      transition: all 0.4s ease;
+      background: #fff;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    .product-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .product-img {
+      height: 220px;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+    .product-card:hover .product-img {
+      transform: scale(1.1);
+    }
+
+    /* Badge stok / promo */
+    .badge-custom {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #f39c12;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+
+    /* Modal */
+    .modal-content {
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+    .modal-header {
+      background: #f8f9fa;
+      border-bottom: none;
+    }
+    .modal-footer {
+      background: #f8f9fa;
+      border-top: none;
+    }
+  </style>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+@include('Components.footer2')
+</body>
+</html>
